@@ -14,7 +14,7 @@
   },
   "attributes": {
     "username": {
-      "type": "string",
+      "type": "uid",
       "minLength": 3,
       "unique": true,
       "configurable": false,
@@ -67,6 +67,17 @@
       "type": "date",
       "required": true,
       "private": true
+    },
+    "firstName": {
+      "type": "string",
+      "maxLength": 15,
+      "minLength": 2,
+      "required": true
+    },
+    "lastName": {
+      "type": "string",
+      "maxLength": 15,
+      "minLength": 2
     }
   }
 }

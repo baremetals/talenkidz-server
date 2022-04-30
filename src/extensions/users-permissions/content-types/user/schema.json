@@ -65,19 +65,36 @@
     },
     "DateOfBirth": {
       "type": "date",
-      "required": true,
+      "required": false,
       "private": true
     },
-    "firstName": {
+    "fullName": {
       "type": "string",
       "maxLength": 15,
       "minLength": 2,
       "required": true
     },
-    "lastName": {
+    "avatar": {
       "type": "string",
-      "maxLength": 15,
-      "minLength": 2
+      "default": "https://storage.googleapis.com/baremets_tutor/default_4bbd2a07e9/default_4bbd2a07e9.jpg?updated_at=2022-02-09T20:23:20.441Z"
+    },
+    "backgroundImg": {
+      "type": "string",
+      "default": "https://storage.googleapis.com/baremets_tutor/background_e44f188732/background_e44f188732.jpg?updated_at=2022-02-09T20:23:42.358Z"
+    },
+    "userType": {
+      "type": "enumeration",
+      "enum": [
+        "candidate",
+        "organisation"
+      ],
+      "required": true,
+      "default": "candidate"
+    },
+    "organisation": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::organisation.organisation"
     }
   }
 }

@@ -1,5 +1,19 @@
+const storagedb = require("../storagedb.json");
 module.exports = ({ env }) => ({
   // all plugins goes here
+  upload: {
+    config: {
+      provider: env("UPLOAD_PROVIDER"),
+      providerOptions: {
+        bucketName: env("GCS_BUCKET_NAME"),
+        publicFiles: env("GCS_PUBLIC_FILES"),
+        uniform: env("GCS_UNIFORM"),
+        serviceAccount: storagedb,
+        baseUrl: env("GCS_BASE_URL"),
+        basePath: env("GCS_BASE_PATH"),
+      },
+    },
+  },
   graphql: {
     config: {
       endpoint: "/graphql",
@@ -16,13 +30,13 @@ module.exports = ({ env }) => ({
   // EMAILS
   email: {
     config: {
-      provider: "sendgrid",
+      provider: env("EMAIL_PROVIDER"),
       providerOptions: {
         apiKey: env("SENDGRID_API_KEY"),
       },
       settings: {
-        defaultFrom: "noreply@talentkids.io",
-        defaultReplyTo: "noreply@talentkids.io",
+        defaultFrom: env("EMAIL_FROM"),
+        defaultReplyTo: env("EMAIL_FROM"),
         // testAddress: "baremetals16@gmail.com",
       },
     },

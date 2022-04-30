@@ -1,5 +1,5 @@
 {
-  "name": "server",
+  "name": "talentkids_server",
   "private": true,
   "version": "0.1.0",
   "description": "A Strapi application",
@@ -11,15 +11,16 @@
   },
   "devDependencies": {},
   "dependencies": {
-    "@strapi/plugin-graphql": "4.0.5",
-    "@strapi/plugin-i18n": "4.0.5",
-    "@strapi/plugin-users-permissions": "4.0.5",
-    "@strapi/provider-email-sendgrid": "^4.0.5",
-    "@strapi/strapi": "4.0.5",
-    "pg": "^8.7.1"
+    "@strapi/plugin-graphql": "4.1.7",
+    "@strapi/plugin-i18n": "4.1.7",
+    "@strapi/plugin-users-permissions": "4.1.7",
+    "@strapi/provider-email-sendgrid": "^4.0.7",
+    "@strapi/strapi": "4.1.7",
+    "pg": "^8.7.1",
+    "strapi-provider-upload-google-cloud-storage": "^4.0.0"
   },
   "author": {
-    "name": "A Strapi developer"
+    "name": "Daniel Asante"
   },
   "strapi": {
     "uuid": "68533ac0-e598-4ab0-9ffe-f71838a04ed9"

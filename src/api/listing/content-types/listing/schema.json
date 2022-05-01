@@ -54,7 +54,8 @@
     },
     "slug": {
       "type": "uid",
-      "required": false
+      "required": false,
+      "targetField": "title"
     },
     "startTime": {
       "type": "string"

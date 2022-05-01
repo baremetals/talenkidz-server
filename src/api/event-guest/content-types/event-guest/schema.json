@@ -1,0 +1,28 @@
+{
+  "kind": "collectionType",
+  "collectionName": "event_guests",
+  "info": {
+    "singularName": "event-guest",
+    "pluralName": "event-guests",
+    "displayName": "EventGuest"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "guests": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "plugin::users-permissions.user"
+    },
+    "totalGuests": {
+      "type": "biginteger"
+    },
+    "event": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::event.event"
+    }
+  }
+}

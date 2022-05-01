@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_address_locations",
+  "info": {
+    "displayName": "Location",
+    "icon": "location-arrow"
+  },
+  "options": {},
+  "attributes": {
+    "numberOrName": {
+      "type": "string"
+    },
+    "street": {
+      "type": "string"
+    },
+    "town": {
+      "type": "string"
+    },
+    "postCode": {
+      "type": "string"
+    }
+  }
+}

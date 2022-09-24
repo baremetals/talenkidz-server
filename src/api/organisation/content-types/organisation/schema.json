@@ -31,6 +31,15 @@
     "fullProfile": {
       "type": "boolean",
       "default": false
+    },
+    "bio": {
+      "type": "text"
+    },
+    "organisationType": {
+      "type": "string"
+    },
+    "website": {
+      "type": "string"
     }
   }
 }

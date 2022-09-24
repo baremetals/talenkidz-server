@@ -95,6 +95,15 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "api::organisation.organisation"
+    },
+    "bio": {
+      "type": "text"
+    },
+    "gender": {
+      "type": "string"
+    },
+    "pronoun": {
+      "type": "string"
     }
   }
 }

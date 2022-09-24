@@ -116,6 +116,5 @@ exports
 *.cache
 build
 .strapi-updater.json
-yarn.lock
 storagedb.json
 app.yaml

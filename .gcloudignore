@@ -2,8 +2,12 @@
 .git
 .gitignore
 node_modules/
-#!include:.gitignore
+!include:.gitignore
 !.env
 .env
-*.cache
+.cache
 build
+.dockerignore
+.strapi-updater.json
+app.yaml
+app-dev.yml

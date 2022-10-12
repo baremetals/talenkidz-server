@@ -3,7 +3,7 @@
 A quick description of your strapi application
 
 App engine
-gcloud app deploy app.yaml --project
+gcloud app deploy app.yaml --project 
 
 Cloud Build
 **Get current project**

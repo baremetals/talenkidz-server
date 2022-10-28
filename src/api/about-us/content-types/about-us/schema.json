@@ -4,16 +4,70 @@
   "info": {
     "singularName": "about-us",
     "pluralName": "about-uses",
-    "displayName": "About Us"
+    "displayName": "About Us",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
   },
   "pluginOptions": {},
   "attributes": {
-    "content": {
-      "type": "richtext",
-      "required": true
+    "firstHeader": {
+      "type": "string"
+    },
+    "secondHeader": {
+      "type": "string"
+    },
+    "sectionThree": {
+      "type": "text"
+    },
+    "sectionFour": {
+      "type": "text"
+    },
+    "sectionFive": {
+      "type": "text"
+    },
+    "thirdHeader": {
+      "type": "string"
+    },
+    "fourthHeader": {
+      "type": "string"
+    },
+    "fifthHeader": {
+      "type": "string"
+    },
+    "lastHeader": {
+      "type": "string"
+    },
+    "sectionOne": {
+      "type": "richtext"
+    },
+    "sectionTwo": {
+      "type": "richtext"
+    },
+    "sectionSix": {
+      "type": "richtext"
+    },
+    "sectionSeven": {
+      "type": "richtext"
+    },
+    "sectionEight": {
+      "type": "richtext"
+    },
+    "sectionNine": {
+      "type": "richtext"
+    },
+    "firstQuote": {
+      "type": "text"
+    },
+    "firstQuoteAuthor": {
+      "type": "string"
+    },
+    "secondQuote": {
+      "type": "text"
+    },
+    "secondQuoteAuthor": {
+      "type": "string"
     }
   }
 }

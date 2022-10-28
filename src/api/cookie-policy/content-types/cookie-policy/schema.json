@@ -1,0 +1,18 @@
+{
+  "kind": "singleType",
+  "collectionName": "cookie_policies",
+  "info": {
+    "singularName": "cookie-policy",
+    "pluralName": "cookie-policies",
+    "displayName": "CookiePolicy"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "content": {
+      "type": "richtext"
+    }
+  }
+}

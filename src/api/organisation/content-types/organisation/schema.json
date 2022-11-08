@@ -25,9 +25,6 @@
       "type": "uid",
       "targetField": "name"
     },
-    "logo": {
-      "type": "string"
-    },
     "fullProfile": {
       "type": "boolean",
       "default": false
@@ -40,6 +37,9 @@
     },
     "website": {
       "type": "string"
+    },
+    "logo": {
+      "type": "text"
     }
   }
 }

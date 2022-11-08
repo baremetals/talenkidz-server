@@ -63,7 +63,7 @@
       "type": "string"
     },
     "listImage": {
-      "type": "string"
+      "type": "text"
     }
   }
 }

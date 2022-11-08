@@ -1,5 +1,7 @@
 const confirm_email = require("./email-template/confirm_email");
 const reset = require("./email-template/reset_password");
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.EMAIL_API_KEY);
 
 const crypto = require("crypto");
 const _ = require("lodash");
@@ -19,7 +21,6 @@ const { ApplicationError, ValidationError } = utils.errors;
 const emailRegExp =
   /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-
 const sanitizeUser = (user, ctx) => {
   const { auth } = ctx.state;
   const userSchema = strapi.getModel("plugin::users-permissions.user");
@@ -32,7 +33,7 @@ const getService = (name) => {
 };
 
 module.exports = (plugin) => {
-  plugin.controllers.user.findOne = async(ctx) => {
+  plugin.controllers.user.findOne = async (ctx) => {
     const { id } = ctx.params;
 
     const entity = await strapi.db
@@ -46,8 +47,7 @@ module.exports = (plugin) => {
     return ctx.send({ user: sanitizedEntity });
   };
 
-  plugin.controllers.auth.callback = async(ctx) => {
-
+  plugin.controllers.auth.callback = async (ctx) => {
     const provider = ctx.params.provider || "local";
     const params = ctx.request.body;
 
@@ -78,7 +78,7 @@ module.exports = (plugin) => {
       // Check if the user exists.
       const user = await strapi
         .query("plugin::users-permissions.user")
-        .findOne({ where: query, populate: { organisation: true} });
+        .findOne({ where: query, populate: { organisation: true } });
 
       if (!user) {
         throw new ValidationError("Invalid identifier or password");
@@ -145,7 +145,7 @@ module.exports = (plugin) => {
         user: await sanitizeUser(user, ctx),
       });
     }
-  }
+  };
 
   plugin.controllers.auth.forgotPassword = async (ctx) => {
     let { email } = ctx.request.body;
@@ -198,9 +198,7 @@ module.exports = (plugin) => {
 
     const userInfo = await sanitizeUser(user, ctx);
 
-    
-
-    settings.message = reset.html
+    settings.message = reset.html;
 
     settings.message = await getService("users-permissions").template(
       settings.message,
@@ -210,7 +208,7 @@ module.exports = (plugin) => {
         TOKEN: resetPasswordToken,
       }
     );
-    
+
     // console.log(settings.message);
 
     settings.object = await getService("users-permissions").template(
@@ -220,22 +218,45 @@ module.exports = (plugin) => {
       }
     );
 
+    const emailTemplate = {
+      to: `${user.email}`, // recipient
+      from: "Talentkids.io <noreply@talentkids.io>", // Change to verified sender
+      template_id: "d-2d1c3546ff9e4eea9eab196625725a2a",
+      dynamic_template_data: {
+        subject: `Reset Password`,
+        username: `${user.username}`,
+        url: `${advanced.email_reset_password}/?code=${resetPasswordToken}`, //`"<%= URL %>?code=<%= TOKEN %>`,
+        firstLine: "We heard that you lost your password. Sorry about that!.",
+        secondLine: `But don’t worry! You can use the button above to reset
+                        your password.`,
+        buttonText: "Reset Password",
+      },
+    };
+
     try {
-      // Send an email to the user.
-      await strapi
-        .plugin("email")
-        .service("email")
-        .send({
-          to: user.email,
-          from:
-            settings.from.email || settings.from.name
-              ? `${settings.from.name} <${settings.from.email}>`
-              : undefined,
-          replyTo: settings.response_email,
-          subject: settings.object,
-          text: settings.message,
-          html: settings.message,
+      await sgMail
+        .send(emailTemplate)
+        .then((res) => {
+          console.log("Email sent", res[0].statusCode);
+        })
+        .catch((error) => {
+          console.log(`Sending the verify email produced this error: ${error}`);
         });
+      // Send an email to the user.
+      // await strapi
+      //   .plugin("email")
+      //   .service("email")
+      //   .send({
+      //     to: user.email,
+      //     from:
+      //       settings.from.email || settings.from.name
+      //         ? `${settings.from.name} <${settings.from.email}>`
+      //         : undefined,
+      //     replyTo: settings.response_email,
+      //     subject: settings.object,
+      //     text: settings.message,
+      //     html: settings.message,
+      //   });
     } catch (err) {
       throw new ApplicationError(err.message);
     }
@@ -249,7 +270,6 @@ module.exports = (plugin) => {
   };
 
   plugin.controllers.auth.register = async (ctx) => {
-    
     const pluginStore = await strapi.store({
       type: "plugin",
       name: "users-permissions",
@@ -266,21 +286,15 @@ module.exports = (plugin) => {
     const params = {
       ..._.omit(ctx.request.body, [
         "confirmed",
+        "blocked",
         "confirmationToken",
         "resetPasswordToken",
+        "provider",
       ]),
       provider: "local",
     };
 
     await validateRegisterBody(params);
-
-    // Throw an error if the password selected by the user
-    // contains more than three times the symbol '$'.
-    if (getService("user").isHashed(params.password)) {
-      throw new ValidationError(
-        "Your password cannot contain more than three times the symbol `$`"
-      );
-    }
 
     const role = await strapi
       .query("plugin::users-permissions.role")
@@ -290,79 +304,77 @@ module.exports = (plugin) => {
       throw new ApplicationError("Impossible to find the default role");
     }
 
-    // Check if the provided email is valid or not.
-    const isEmail = emailRegExp.test(params.email);
+    const { email, username, provider } = params;
 
-    if (isEmail) {
-      params.email = params.email.toLowerCase();
-    } else {
-      throw new ValidationError("Please provide a valid email address");
+    const identifierFilter = {
+      $or: [
+        { email: email.toLowerCase() },
+        { username: email.toLowerCase() },
+        { username },
+        { email: username },
+      ],
+    };
+
+    const conflictingUserCount = await strapi
+      .query("plugin::users-permissions.user")
+      .count({
+        where: { ...identifierFilter, provider },
+      });
+
+    if (conflictingUserCount > 0) {
+      throw new ApplicationError("Email or Username are already taken");
     }
 
-    params.role = role.id;
+    if (settings.unique_email) {
+      const conflictingUserCount = await strapi
+        .query("plugin::users-permissions.user")
+        .count({
+          where: { ...identifierFilter },
+        });
 
-    const user = await strapi.query("plugin::users-permissions.user").findOne({
-      where: { email: params.email },
+      if (conflictingUserCount > 0) {
+        throw new ApplicationError("Email or Username are already taken");
+      }
+    }
+
+    const newUser = {
+      ...params,
+      role: role.id,
+      email: email.toLowerCase(),
+      username,
+      confirmed: !settings.email_confirmation,
+    };
+
+    const user = await getService("user").add(newUser);
+
+    const sanitizedUser = await sanitizeUser(user, ctx);
+
+    if (sanitizedUser.userType === "candidate") {
+      await createCandidate(sanitizedUser.id);
+      // , createOrganisation
+    } else {
+      const { id, avatar, username } = sanitizedUser;
+      await createOrganisation(id, username, avatar);
+    }
+
+    if (settings.email_confirmation) {
+      try {
+        await sendConfirmationEmail(sanitizedUser);
+      } catch (err) {
+        throw new ApplicationError(err.message);
+      }
+
+      return ctx.send({ user: sanitizedUser });
+    }
+
+    const jwt = getService("jwt").issue(_.pick(user, ["id"]));
+
+    return ctx.send({
+      jwt,
+      user: sanitizedUser,
     });
 
-    if (user && user.provider === params.provider) {
-      throw new ApplicationError("Email is already taken");
-    }
-
-    if (user && user.provider !== params.provider && settings.unique_email) {
-      throw new ApplicationError("Email is already taken");
-    }
-
-    try {
-      if (!settings.email_confirmation) {
-        params.confirmed = true;
-      }
-
-      const usr = await getService("user").add(params);
-
-      const sanitizedUser = await sanitizeUser(usr, ctx);
-
-      // console.log(sanitizedUser);
-
-      if (sanitizedUser.userType === "candidate") {
-        await createCandidate(sanitizedUser.id);
-        // , createOrganisation
-      } else {
-        const { id, avatar, username } = sanitizedUser;
-        await createOrganisation(id, username, avatar);
-      }
-
-      if (settings.email_confirmation) {
-        try {
-          await sendConfirmationEmail(sanitizedUser);
-        } catch (err) {
-          throw new ApplicationError(err.message);
-        }
-
-        return ctx.send({ user: sanitizedUser });
-      }
-
-      const jwt = getService("jwt").issue(_.pick(usr, ["id"]));
-
-      return ctx.send({
-        jwt,
-        user: sanitizedUser,
-      });
-    } catch (err) {
-      if (_.includes(err.message, "unique")) {
-        throw new ApplicationError("Username already taken");
-      } else if (_.includes(err.message, "email")) {
-        throw new ApplicationError("Email already taken");
-      } else if (_.includes(err.message, "username must match the following")) {
-        throw new ApplicationError(
-          "username must match the following (A-Za-z0-9-_.)"
-        );
-      } else {
-        strapi.log.error(err);
-        throw new ApplicationError("An error occurred during account creation");
-      }
-    }
-  }
+  };
 
   const sendConfirmationEmail = async (user) => {
     // console.log(user, "I am in this bitch");
@@ -372,6 +384,7 @@ module.exports = (plugin) => {
       type: "plugin",
       name: "users-permissions",
     });
+
     const userSchema = strapi.getModel("plugin::users-permissions.user");
 
     const settings = await pluginStore
@@ -407,32 +420,65 @@ module.exports = (plugin) => {
       USER: sanitizedUserInfo,
     });
 
-    // Send an email to the user.
-    await strapi
-      .plugin("email")
-      .service("email")
-      .send({
-        to: user.email,
-        from:
-          settings.from.email && settings.from.name
-            ? `${settings.from.name} <${settings.from.email}>`
-            : undefined,
-        replyTo: settings.response_email,
+    // console.log(settings.message.URL);
+
+    const emailTemplate = {
+      to: `${user.email}`, // recipient
+      from: "Talentkids.io <noreply@talentkids.io>", // Change to verified sender
+      template_id: "d-2d1c3546ff9e4eea9eab196625725a2a",
+      dynamic_template_data: {
+        // subject: `Verify Email`,
         subject: settings.object,
-        text: settings.message,
-        html: settings.message,
+        username: `${user.username}`,
+        url: `${process.env.APP_URL}/api/auth/email-confirmation?confirmation=${confirmationToken}`,
+        firstLine: "Thank you for registering!",
+        secondLine:
+          "You have to confirm your email address. Please click on the button above.",
+        buttonText: "Verify Email",
+      },
+    };
+
+    console.log("fever stuff", user.email);
+
+    await sgMail
+      .send(emailTemplate)
+      .then((res) => {
+        console.log("Email sent", res[0].statusCode);
+      })
+      .catch((error) => {
+        console.log(`Sending the verify email produced this error: ${error}`);
       });
+
+    // Send an email to the user.
+    // await strapi
+    //   .plugin("email")
+    //   .service("email")
+    //   .send({
+    //     to: user.email,
+    //     from:
+    //       settings.from.email && settings.from.name
+    //         ? `${settings.from.name} <${settings.from.email}>`
+    //         : undefined,
+    //     replyTo: settings.response_email,
+    //     subject: settings.object,
+    //     text: settings.message,
+    //     html: settings.message,
+    //   });
   };
 
   const edit = async (userId, params = {}) => {
-    return strapi.entityService.update('plugin::users-permissions.user', userId, {
-      data: params,
-      populate: ['role'],
-    });
-  }
+    return strapi.entityService.update(
+      "plugin::users-permissions.user",
+      userId,
+      {
+        data: params,
+        populate: ["role"],
+      }
+    );
+  };
 
   plugin.controllers.auth.sendEmailConfirmation = async (ctx) => {
-    console.log("I am going ta rass" ,ctx.req.data)
+    console.log("I am going ta rass", ctx.req.data);
 
     const params = _.assign(ctx.request.body);
 
@@ -471,8 +517,7 @@ module.exports = (plugin) => {
     } catch (err) {
       throw new ApplicationError(err.message);
     }
-  }
+  };
 
   return plugin;
 };
-

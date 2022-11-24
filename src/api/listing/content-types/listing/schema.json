@@ -65,6 +65,44 @@
     },
     "listImage": {
       "type": "text"
+    },
+    "link": {
+      "type": "string",
+      "default": "https://talentkids.io"
+    },
+    "status": {
+      "type": "enumeration",
+      "enum": [
+        "scheduled",
+        "live",
+        "disabled",
+        "cancelled"
+      ],
+      "default": "scheduled"
+    },
+    "venue": {
+      "type": "enumeration",
+      "enum": [
+        "location",
+        "online",
+        "both"
+      ],
+      "default": "location"
+    },
+    "linkButtonText": {
+      "type": "enumeration",
+      "enum": [
+        "Register",
+        "Learn More",
+        "Visit Us",
+        "Buy Tickets",
+        "Buy Now"
+      ],
+      "default": "Learn More"
+    },
+    "price": {
+      "type": "string",
+      "default": "0"
     }
   }
 }

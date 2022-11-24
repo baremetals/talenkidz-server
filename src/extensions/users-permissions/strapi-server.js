@@ -50,11 +50,18 @@ module.exports = (plugin) => {
   plugin.controllers.auth.callback = async (ctx) => {
     const provider = ctx.params.provider || "local";
     const params = ctx.request.body;
-
-    const store = await strapi.store({
+    console.log("query: ", ctx.query);
+    const store = strapi.store({
       type: "plugin",
       name: "users-permissions",
     });
+    const grantSettings = await store.get({ key: "grant" });
+
+    const grantProvider = provider === "local" ? "email" : provider;
+
+    if (!_.get(grantSettings, [grantProvider, "enabled"])) {
+      throw new ApplicationError("This provider is disabled");
+    }
 
     if (provider === "local") {
       if (!_.get(await store.get({ key: "grant" }), "email.enabled")) {
@@ -112,38 +119,25 @@ module.exports = (plugin) => {
       if (!validPassword) {
         throw new ValidationError("Invalid identifier or password");
       } else {
-        ctx.send({
+        return ctx.send({
           jwt: getService("jwt").issue({
             id: user.id,
           }),
           user: await sanitizeUser(user, ctx),
         });
       }
-    } else {
-      if (!_.get(await store.get({ key: "grant" }), [provider, "enabled"])) {
-        throw new ApplicationError("This provider is disabled");
-      }
+    }
 
-      // Connect the user with the third-party provider.
-      let user;
-      let error;
-      try {
-        [user, error] = await getService("providers").connect(
-          provider,
-          ctx.query
-        );
-      } catch ([user, error]) {
-        throw new ApplicationError(error.message);
-      }
-
-      if (!user) {
-        throw new ApplicationError(error.message);
-      }
-
-      ctx.send({
+    // Connect the user with the third-party provider.
+    try {
+      const user = await getService("providers").connect(provider, ctx.query);
+      return ctx.send({
         jwt: getService("jwt").issue({ id: user.id }),
         user: await sanitizeUser(user, ctx),
       });
+    } catch (error) {
+      // console.log('the fucking error: ', error.message)
+      throw new ApplicationError(error.message);
     }
   };
 
@@ -375,6 +369,48 @@ module.exports = (plugin) => {
     });
 
   };
+
+  // plugin.controllers.auth.connect = async (ctx, next) => {
+  //   // console.log(ctx)
+  //   const grant = require('grant-koa');
+    
+  //   const providers = await strapi
+  //     .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
+  //     .get();
+
+  //   const apiPrefix = strapi.config.get('api.rest.prefix');
+  //   const grantConfig = {
+  //     defaults: {
+  //       prefix: `${apiPrefix}/connect`,
+  //     },
+  //     ...providers,
+  //   };
+
+    
+  //   const [requestPath] = ctx.request.url.split('?');
+  //   const provider = requestPath.split('/connect/')[1].split('/')[0];
+    
+  //   if (!_.get(grantConfig[provider], 'enabled')) {
+  //     throw new ApplicationError('This provider is disabled');
+  //   }
+
+  //   if (!strapi.config.server.url.startsWith('http')) {
+  //     strapi.log.warn(
+  //       'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#setting-up-the-server-url'
+  //     );
+  //   }
+    
+  //   // Ability to pass OAuth callback dynamically
+  //   grantConfig[provider].callback =
+  //     _.get(ctx, 'query.callback') ||
+  //     _.get(ctx, 'session.grant.dynamic.callback') ||
+  //     grantConfig[provider].callback;
+  //   grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
+
+  //   const test = await grant(grantConfig)(ctx, next);
+  //   console.log("the test", grant(test));
+  //   // return grant(grantConfig)(ctx, next);
+  // }
 
   const sendConfirmationEmail = async (user) => {
     // console.log(user, "I am in this bitch");

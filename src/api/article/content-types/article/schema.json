@@ -52,6 +52,9 @@
     },
     "blurb": {
       "type": "text"
+    },
+    "readingTime": {
+      "type": "string"
     }
   }
 }

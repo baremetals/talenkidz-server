@@ -2,11 +2,12 @@
   "collectionName": "components_address_locations",
   "info": {
     "displayName": "Location",
-    "icon": "location-arrow"
+    "icon": "location-arrow",
+    "description": ""
   },
   "options": {},
   "attributes": {
-    "numberOrName": {
+    "name": {
       "type": "string"
     },
     "street": {
@@ -17,6 +18,14 @@
     },
     "postCode": {
       "type": "string"
+    },
+    "longtitude": {
+      "type": "float",
+      "default": 0
+    },
+    "latitude": {
+      "type": "float",
+      "default": 0
     }
   }
 }

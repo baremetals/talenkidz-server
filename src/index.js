@@ -1,4 +1,5 @@
 'use strict';
+const session = require("koa-session2");
 
 module.exports = {
   /**
@@ -20,6 +21,11 @@ module.exports = {
         }),
       ],
     }));
+    strapi.server.use(
+      session({
+        secret: "grant",
+      })
+    );
   },
 
   /**

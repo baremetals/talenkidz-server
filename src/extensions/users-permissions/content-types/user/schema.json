@@ -72,7 +72,7 @@
       "type": "string",
       "maxLength": 15,
       "minLength": 2,
-      "required": true
+      "required": false
     },
     "userType": {
       "type": "enumeration",

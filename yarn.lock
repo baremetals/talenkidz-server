@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@_sh/strapi-plugin-ckeditor@^1.1.0":
+"@_sh/strapi-plugin-ckeditor@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@_sh/strapi-plugin-ckeditor/-/strapi-plugin-ckeditor-1.1.2.tgz#27410a8b74ac24aeaa150b69fdd18af4c601c1a6"
   integrity sha512-lsxiQZmvxWOjiYKXCtdCbdrjwZ8WFw6p/+z/DTfLPQULJoSSW/omPPy3ZLyLFI3JYkqyRpJ1hFojymhTOM6k4w==
@@ -5966,7 +5966,7 @@ graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.2, 
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.10.tgz#147d3a006da4ca3ce14728c7aefc287c367d7a6c"
   integrity sha512-9ByhssR2fPVsNZj478qUUbKfmL0+t5BDVyjShtyZZLiK7ZDAArFFfopyOTj0M05wE2tJPisA4iTnnXl2YoPvOA==
 
-grant-koa@5.4.8:
+grant-koa@5.4.8, grant-koa@^5.4.8:
   version "5.4.8"
   resolved "https://registry.yarnpkg.com/grant-koa/-/grant-koa-5.4.8.tgz#2fc49ad91007588fff58559cffa44dca9f06835d"
   integrity sha512-Kw8np9AL3Z3mZuvoSUklHJpTe3xx7iLBDauRyIwwbDLRr/5Ll6APmOFHixXj+Vw+LGEnreTxO35CyhAf9oBUMA==

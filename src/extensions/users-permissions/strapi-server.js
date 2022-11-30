@@ -50,7 +50,7 @@ module.exports = (plugin) => {
   plugin.controllers.auth.callback = async (ctx) => {
     const provider = ctx.params.provider || "local";
     const params = ctx.request.body;
-    console.log("query: ", ctx.query);
+    // console.log("query: ", ctx.query);
     const store = strapi.store({
       type: "plugin",
       name: "users-permissions",
@@ -131,6 +131,7 @@ module.exports = (plugin) => {
     // Connect the user with the third-party provider.
     try {
       const user = await getService("providers").connect(provider, ctx.query);
+      // console.log(user)
       return ctx.send({
         jwt: getService("jwt").issue({ id: user.id }),
         user: await sanitizeUser(user, ctx),
@@ -371,7 +372,7 @@ module.exports = (plugin) => {
   };
 
   // plugin.controllers.auth.connect = async (ctx, next) => {
-  //   // console.log(ctx)
+  //   // console.log('testing route', ctx)
   //   const grant = require('grant-koa');
     
   //   const providers = await strapi
@@ -407,9 +408,9 @@ module.exports = (plugin) => {
   //     grantConfig[provider].callback;
   //   grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
 
-  //   const test = await grant(grantConfig)(ctx, next);
-  //   console.log("the test", grant(test));
-  //   // return grant(grantConfig)(ctx, next);
+  //   // const test = await grant(grantConfig)(ctx, next);
+  //   // console.log("the test", grant(test));
+  //   return grant(grantConfig)(ctx, next);
   // }
 
   const sendConfirmationEmail = async (user) => {

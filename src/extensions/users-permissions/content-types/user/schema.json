@@ -104,6 +104,19 @@
     "backgroundImg": {
       "type": "text",
       "default": "https://storage.googleapis.com/talentkids-dev/background_a1b9159274/background_a1b9159274.jpg?updated_at=2022-11-01T16:31:51.619Z"
+    },
+    "mailinglist": {
+      "type": "boolean",
+      "default": false
+    },
+    "membership": {
+      "type": "enumeration",
+      "enum": [
+        "basic",
+        "premium",
+        "organisation"
+      ],
+      "default": "basic"
     }
   }
 }

@@ -12,12 +12,13 @@
   },
   "devDependencies": {},
   "dependencies": {
-    "@_sh/strapi-plugin-ckeditor": "^1.1.0",
+    "@_sh/strapi-plugin-ckeditor": "^1.1.2",
     "@strapi/plugin-graphql": "4.4.3",
     "@strapi/plugin-i18n": "4.4.3",
     "@strapi/plugin-users-permissions": "4.4.3",
     "@strapi/provider-email-sendgrid": "^4.2.2",
     "@strapi/strapi": "4.4.3",
+    "grant-koa": "^5.4.8",
     "koa-session2": "^2.2.10",
     "pg": "^8.7.1",
     "strapi-provider-upload-google-cloud-storage": "^4.0.0"

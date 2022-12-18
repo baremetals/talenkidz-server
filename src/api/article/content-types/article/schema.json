@@ -55,6 +55,23 @@
     },
     "readingTime": {
       "type": "string"
+    },
+    "totalLikes": {
+      "type": "integer",
+      "default": 0
+    },
+    "totalComments": {
+      "type": "integer",
+      "default": 0
+    },
+    "firebaseId": {
+      "type": "string"
+    },
+    "likes": {
+      "displayName": "likes",
+      "type": "component",
+      "repeatable": true,
+      "component": "likes.likes"
     }
   }
 }

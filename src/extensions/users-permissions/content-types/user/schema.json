@@ -117,6 +117,13 @@
         "organisation"
       ],
       "default": "basic"
+    },
+    "firebaseUserId": {
+      "type": "string",
+      "default": "not set"
+    },
+    "firebasePassword": {
+      "type": "string"
     }
   }
 }

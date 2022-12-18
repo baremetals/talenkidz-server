@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_likes_likes",
+  "info": {
+    "displayName": "likes",
+    "icon": "thumbs-up"
+  },
+  "options": {},
+  "attributes": {
+    "userId": {
+      "type": "integer",
+      "required": true
+    }
+  }
+}

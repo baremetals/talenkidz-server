@@ -33,7 +33,7 @@
     "host": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::organisation.organisation"
+      "target": "plugin::users-permissions.user"
     },
     "Location": {
       "type": "component",
@@ -55,9 +55,6 @@
       "type": "relation",
       "relation": "oneToMany",
       "target": "api::event-guest.event-guest"
-    },
-    "startTime": {
-      "type": "string"
     },
     "endTime": {
       "type": "string"
@@ -102,6 +99,18 @@
     "price": {
       "type": "string",
       "default": "0"
+    },
+    "startTime": {
+      "type": "time"
+    },
+    "views": {
+      "type": "biginteger"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order",
+      "mappedBy": "event"
     }
   }
 }

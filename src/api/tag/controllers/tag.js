@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- *  candidate controller
+ * tag controller
  */
 
 const { createCoreController } = require('@strapi/strapi').factories;
 
-module.exports = createCoreController('api::candidate.candidate');
+module.exports = createCoreController('api::tag.tag');

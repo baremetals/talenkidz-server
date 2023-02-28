@@ -344,13 +344,13 @@ module.exports = (plugin) => {
 
     const sanitizedUser = await sanitizeUser(user, ctx);
 
-    if (sanitizedUser.userType === "candidate") {
-      await createCandidate(sanitizedUser.id);
-      // , createOrganisation
-    } else {
-      const { id, avatar, username } = sanitizedUser;
-      await createOrganisation(id, username, avatar);
-    }
+    // if (sanitizedUser.userType === "candidate") {
+    //   await createCandidate(sanitizedUser.id);
+    //   // , createOrganisation
+    // } else {
+    //   const { id, avatar, username } = sanitizedUser;
+    //   await createOrganisation(id, username, avatar);
+    // }
 
     if (settings.email_confirmation) {
       try {
@@ -370,6 +370,46 @@ module.exports = (plugin) => {
     });
 
   };
+
+  // plugin.controllers.auth.changePasssword = async (ctx) => {
+    
+  //   if (!ctx.state.user) {
+  //     throw new ApplicationError(
+  //       "You must be authenticated to reset your password"
+  //     );
+  //   }
+
+  //   const { currentPassword, password } = await validateChangePasswordBody(
+  //     ctx.request.body
+  //   );
+
+  //   const user = await strapi.entityService.findOne(
+  //     "plugin::users-permissions.user",
+  //     ctx.state.user.id
+  //   );
+
+  //   const validPassword = await getService("user").validatePassword(
+  //     currentPassword,
+  //     user.password
+  //   );
+
+  //   if (!validPassword) {
+  //     throw new ValidationError("The provided current password is invalid");
+  //   }
+
+  //   if (currentPassword === password) {
+  //     throw new ValidationError(
+  //       "Your new password must be different than your current password"
+  //     );
+  //   }
+
+  //   await getService("user").edit(user.id, { password });
+
+  //   ctx.send({
+  //     jwt: getService("jwt").issue({ id: user.id }),
+  //     user: await sanitizeUser(user, ctx),
+  //   });
+  // }
 
   // plugin.controllers.auth.connect = async (ctx, next) => {
   //   // console.log('testing route', ctx)

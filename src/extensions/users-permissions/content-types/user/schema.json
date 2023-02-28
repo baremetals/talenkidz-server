@@ -77,16 +77,11 @@
     "userType": {
       "type": "enumeration",
       "enum": [
-        "candidate",
+        "standard",
         "organisation"
       ],
       "required": true,
-      "default": "candidate"
-    },
-    "organisation": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::organisation.organisation"
+      "default": "standard"
     },
     "bio": {
       "type": "text"
@@ -114,7 +109,8 @@
       "enum": [
         "basic",
         "premium",
-        "organisation"
+        "organisation",
+        "Partner"
       ],
       "default": "basic"
     },
@@ -124,6 +120,32 @@
     },
     "firebasePassword": {
       "type": "string"
+    },
+    "organisation": {
+      "displayName": "organisation",
+      "type": "component",
+      "repeatable": false,
+      "component": "organisation.organisation"
+    },
+    "bookmarklist": {
+      "type": "component",
+      "repeatable": true,
+      "component": "book-marks.reading-list"
+    },
+    "subscription": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::subscription.subscription",
+      "mappedBy": "user"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order",
+      "mappedBy": "user"
+    },
+    "stripeCustomerId": {
+      "type": "uid"
     }
   }
 }

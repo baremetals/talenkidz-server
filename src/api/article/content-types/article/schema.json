@@ -72,6 +72,12 @@
       "type": "component",
       "repeatable": true,
       "component": "likes.likes"
+    },
+    "views": {
+      "type": "biginteger"
+    },
+    "totalBookmarks": {
+      "type": "biginteger"
     }
   }
 }

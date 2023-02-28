@@ -24,7 +24,7 @@
     "host": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "api::organisation.organisation"
+      "target": "plugin::users-permissions.user"
     },
     "category": {
       "type": "relation",
@@ -103,6 +103,21 @@
     "price": {
       "type": "string",
       "default": "0"
+    },
+    "views": {
+      "type": "biginteger"
+    },
+    "tags": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::tag.tag",
+      "mappedBy": "listing"
+    },
+    "order": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::order.order",
+      "mappedBy": "listing"
     }
   }
 }

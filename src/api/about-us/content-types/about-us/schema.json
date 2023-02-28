@@ -12,51 +12,6 @@
   },
   "pluginOptions": {},
   "attributes": {
-    "firstHeader": {
-      "type": "string"
-    },
-    "secondHeader": {
-      "type": "string"
-    },
-    "sectionThree": {
-      "type": "text"
-    },
-    "sectionFour": {
-      "type": "text"
-    },
-    "sectionFive": {
-      "type": "text"
-    },
-    "thirdHeader": {
-      "type": "string"
-    },
-    "fourthHeader": {
-      "type": "string"
-    },
-    "fifthHeader": {
-      "type": "string"
-    },
-    "lastHeader": {
-      "type": "string"
-    },
-    "sectionOne": {
-      "type": "richtext"
-    },
-    "sectionTwo": {
-      "type": "richtext"
-    },
-    "sectionSix": {
-      "type": "richtext"
-    },
-    "sectionSeven": {
-      "type": "richtext"
-    },
-    "sectionEight": {
-      "type": "richtext"
-    },
-    "sectionNine": {
-      "type": "richtext"
-    },
     "firstQuote": {
       "type": "text"
     },
@@ -67,6 +22,39 @@
       "type": "text"
     },
     "secondQuoteAuthor": {
+      "type": "string"
+    },
+    "puzzleImage": {
+      "type": "text"
+    },
+    "cloudImage": {
+      "type": "text"
+    },
+    "graphImage": {
+      "type": "text"
+    },
+    "mainTitle": {
+      "type": "string"
+    },
+    "firstBlock": {
+      "type": "json"
+    },
+    "secondBlock": {
+      "type": "json"
+    },
+    "thirdBlock": {
+      "type": "json"
+    },
+    "fourthBlock": {
+      "type": "richtext"
+    },
+    "fithBlock": {
+      "type": "json"
+    },
+    "lastBlock": {
+      "type": "json"
+    },
+    "spanKey": {
       "type": "string"
     }
   }

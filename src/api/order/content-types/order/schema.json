@@ -1,0 +1,52 @@
+{
+  "kind": "collectionType",
+  "collectionName": "orders",
+  "info": {
+    "singularName": "order",
+    "pluralName": "orders",
+    "displayName": "order",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "user": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "order"
+    },
+    "product": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::product.product",
+      "inversedBy": "orders"
+    },
+    "event": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::event.event",
+      "inversedBy": "order"
+    },
+    "listing": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::listing.listing",
+      "inversedBy": "order"
+    },
+    "status": {
+      "type": "boolean"
+    },
+    "total": {
+      "type": "decimal"
+    },
+    "productType": {
+      "type": "string"
+    },
+    "stripeId": {
+      "type": "uid"
+    }
+  }
+}

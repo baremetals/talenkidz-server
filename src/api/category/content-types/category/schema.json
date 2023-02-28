@@ -24,6 +24,15 @@
     },
     "colour": {
       "type": "string"
+    },
+    "views": {
+      "type": "biginteger"
+    },
+    "tags": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::tag.tag",
+      "mappedBy": "category"
     }
   }
 }

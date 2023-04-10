@@ -2,6 +2,12 @@ const confirm_email = require("./email-template/confirm_email");
 const reset = require("./email-template/reset_password");
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.EMAIL_API_KEY);
+const { admin, db, firebase, defaultAuth } = require("../../lib/firebase/index");
+const {
+  createNotification,
+  adminLogo,
+  createMessageNotification,
+} = require("../../lib/firebase/notification");
 
 const crypto = require("crypto");
 const _ = require("lodash");
@@ -12,6 +18,10 @@ const {
   validateCallbackBody,
   validateRegisterBody,
   validateSendEmailConfirmationBody,
+  validateEmailConfirmationBody,
+  validateChangePasswordBody,
+  validateResetPasswordBody,
+  validateForgotPasswordBody,
 } = require("./validation/auth");
 const { createCandidate, createOrganisation } = require("../../lib");
 
@@ -132,6 +142,42 @@ module.exports = (plugin) => {
     try {
       const user = await getService("providers").connect(provider, ctx.query);
       // console.log(user)
+      if (
+        user.firebaseuserId === "not set" &&
+        user.stripeCustomerId === null &&
+        user.notificationsSettings === null
+      ) {
+        const emailTemplate = {
+          subject: "Welcome to talentKids!",
+          username: `${user.fullName.split(" ")[0] || user.username}`,
+          url: process.env.FRONT_END_HOST,
+          firstLine:
+            "Welcome to Talentkids! We're thrilled to have you on board",
+          secondLine: `We encourage you to explore our platform and discover all that talentkids has to offer.`,
+          thirdLine: "",
+          buttonText: "Click here to login",
+        };
+
+        const message = {
+          sender: "talentkids admin",
+          recipientEmail: user.email,
+          recipientName: user.fullName,
+          messageType: "Welcome to TalentKids!",
+          messageImage: adminLogo,
+          subject: "Welcome to talentKids!",
+          message:
+            "Welcome to Talentkids! We're thrilled to have you on board! We encourage you to explore our platform and discover all that talentkids has to offer.",
+          entityId: user.id,
+          entityType: "Auth",
+          url: "",
+        };
+        await createNotification(
+          message,
+          user.email,
+          "d-2d1c3546ff9e4eea9eab196625725a2a",
+          emailTemplate
+        );
+      }
       return ctx.send({
         jwt: getService("jwt").issue({ id: user.id }),
         user: await sanitizeUser(user, ctx),
@@ -143,7 +189,7 @@ module.exports = (plugin) => {
   };
 
   plugin.controllers.auth.forgotPassword = async (ctx) => {
-    let { email } = ctx.request.body;
+    const { email } = await validateForgotPasswordBody(ctx.request.body);
 
     // Check if the provided email is valid or not.
     const isEmail = emailRegExp.test(email);
@@ -219,12 +265,15 @@ module.exports = (plugin) => {
       template_id: "d-2d1c3546ff9e4eea9eab196625725a2a",
       dynamic_template_data: {
         subject: `Reset Password`,
-        username: `${user.username}`,
+        username: `${user.fullName.split(" ")[0] || user.username}`,
         url: `${advanced.email_reset_password}/?code=${resetPasswordToken}`, //`"<%= URL %>?code=<%= TOKEN %>`,
         firstLine: "We heard that you lost your password. Sorry about that!.",
-        secondLine: `But don’t worry! You can use the button above to reset
+        secondLine: `But don’t worry! You can use the button below to reset
                         your password.`,
-        buttonText: "Reset Password",
+        thirdLine: "",
+        buttonText: "Click here to reset password",
+        imageUrl: "If this wasn't you please contact support.",
+        siteUrl: process.env.FRONT_END_HOST,
       },
     };
 
@@ -371,87 +420,111 @@ module.exports = (plugin) => {
 
   };
 
-  // plugin.controllers.auth.changePasssword = async (ctx) => {
+  plugin.controllers.auth.changePasssword = async (ctx) => {
     
-  //   if (!ctx.state.user) {
-  //     throw new ApplicationError(
-  //       "You must be authenticated to reset your password"
-  //     );
-  //   }
+    if (!ctx.state.user) {
+      throw new ApplicationError(
+        "You must be authenticated to reset your password"
+      );
+    }
 
-  //   const { currentPassword, password } = await validateChangePasswordBody(
-  //     ctx.request.body
-  //   );
+    const { currentPassword, password } = await validateChangePasswordBody(
+      ctx.request.body
+    );
 
-  //   const user = await strapi.entityService.findOne(
-  //     "plugin::users-permissions.user",
-  //     ctx.state.user.id
-  //   );
+    const user = await strapi.entityService.findOne(
+      "plugin::users-permissions.user",
+      ctx.state.user.id
+    );
 
-  //   const validPassword = await getService("user").validatePassword(
-  //     currentPassword,
-  //     user.password
-  //   );
+    const validPassword = await getService("user").validatePassword(
+      currentPassword,
+      user.password
+    );
 
-  //   if (!validPassword) {
-  //     throw new ValidationError("The provided current password is invalid");
-  //   }
+    if (!validPassword) {
+      throw new ValidationError("The provided current password is invalid");
+    }
 
-  //   if (currentPassword === password) {
-  //     throw new ValidationError(
-  //       "Your new password must be different than your current password"
-  //     );
-  //   }
+    if (currentPassword === password) {
+      throw new ValidationError(
+        "Your new password must be different than your current password"
+      );
+    }
 
-  //   await getService("user").edit(user.id, { password });
+    try {
+      await defaultAuth.updateUser(user.firebaseId, {
+        password: password,
+      });
+    } catch (err) {
+      throw new ApplicationError(
+        "Something is wrong please try again later"
+      );
+    }
 
-  //   ctx.send({
-  //     jwt: getService("jwt").issue({ id: user.id }),
-  //     user: await sanitizeUser(user, ctx),
-  //   });
-  // }
+    await getService("user").edit(user.id, { password });
 
-  // plugin.controllers.auth.connect = async (ctx, next) => {
-  //   // console.log('testing route', ctx)
-  //   const grant = require('grant-koa');
+    const message = {
+      sender: "talentkids admin",
+      recipientEmail: user.email,
+      recipientName: user.fullName,
+      messageType: "password change",
+      messageImage: adminLogo,
+      subject: "password successfuly updated!",
+      message: "Your password has been updated.",
+      entityId: user.id,
+      entityType: "Auth",
+      url: `/account`,
+    };
+    await createMessageNotification(message);
+
+    ctx.send({
+      jwt: getService("jwt").issue({ id: user.id }),
+      user: await sanitizeUser(user, ctx),
+    });
+  }
+
+  plugin.controllers.auth.connect = async (ctx, next) => {
+    // console.log('testing route', ctx)
+    const grant = require('grant-koa');
     
-  //   const providers = await strapi
-  //     .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
-  //     .get();
+    const providers = await strapi
+      .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
+      .get();
 
-  //   const apiPrefix = strapi.config.get('api.rest.prefix');
-  //   const grantConfig = {
-  //     defaults: {
-  //       prefix: `${apiPrefix}/connect`,
-  //     },
-  //     ...providers,
-  //   };
+    const apiPrefix = strapi.config.get('api.rest.prefix');
+    const grantConfig = {
+      defaults: {
+        prefix: `${apiPrefix}/connect`,
+      },
+      ...providers,
+    };
 
     
-  //   const [requestPath] = ctx.request.url.split('?');
-  //   const provider = requestPath.split('/connect/')[1].split('/')[0];
+    const [requestPath] = ctx.request.url.split('?');
+    const provider = requestPath.split('/connect/')[1].split('/')[0];
     
-  //   if (!_.get(grantConfig[provider], 'enabled')) {
-  //     throw new ApplicationError('This provider is disabled');
-  //   }
+    if (!_.get(grantConfig[provider], 'enabled')) {
+      throw new ApplicationError('This provider is disabled');
+    }
 
-  //   if (!strapi.config.server.url.startsWith('http')) {
-  //     strapi.log.warn(
-  //       'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#setting-up-the-server-url'
-  //     );
-  //   }
+    if (!strapi.config.server.url.startsWith('http')) {
+      strapi.log.warn(
+        'You are using a third party provider for login. Make sure to set an absolute url in config/server.js. More info here: https://docs.strapi.io/developer-docs/latest/plugins/users-permissions.html#setting-up-the-server-url'
+      );
+    }
     
-  //   // Ability to pass OAuth callback dynamically
-  //   grantConfig[provider].callback =
-  //     _.get(ctx, 'query.callback') ||
-  //     _.get(ctx, 'session.grant.dynamic.callback') ||
-  //     grantConfig[provider].callback;
-  //   grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
+    // Ability to pass OAuth callback dynamically
+    grantConfig[provider].callback =
+      _.get(ctx, 'query.callback') ||
+      _.get(ctx, 'session.grant.dynamic.callback') ||
+      grantConfig[provider].callback;
+    grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
 
-  //   // const test = await grant(grantConfig)(ctx, next);
-  //   // console.log("the test", grant(test));
-  //   return grant(grantConfig)(ctx, next);
-  // }
+    // const test = await grant(grantConfig)(ctx, next);
+    // console.log("the test", grant(test));
+    return grant(grantConfig)(ctx, next);
+  }
 
   const sendConfirmationEmail = async (user) => {
     // console.log(user, "I am in this bitch");
@@ -502,20 +575,16 @@ module.exports = (plugin) => {
     const emailTemplate = {
       to: `${user.email}`, // recipient
       from: "Talentkids.io <noreply@talentkids.io>", // Change to verified sender
-      template_id: "d-2d1c3546ff9e4eea9eab196625725a2a",
+      template_id: "d-918de2e1cb7848898a9dc81e5a96eae0",
       dynamic_template_data: {
-        // subject: `Verify Email`,
+        siteUrl: process.env.FRONT_END_HOST,
         subject: settings.object,
-        username: `${user.username}`,
+        firstname: `${user.fullName.split(" ")[0]}`,
         url: `${process.env.APP_URL}/api/auth/email-confirmation?confirmation=${confirmationToken}`,
-        firstLine: "Thank you for registering!",
-        secondLine:
-          "You have to confirm your email address. Please click on the button above.",
-        buttonText: "Verify Email",
       },
     };
 
-    console.log("fever stuff", user.email);
+    // console.log("fever stuff", user.email);
 
     await sgMail
       .send(emailTemplate)
@@ -593,6 +662,121 @@ module.exports = (plugin) => {
       });
     } catch (err) {
       throw new ApplicationError(err.message);
+    }
+  };
+
+  plugin.controllers.auth.resetPassword = async (ctx) => {
+    const { password, passwordConfirmation, code } =
+      await validateResetPasswordBody(ctx.request.body);
+
+    if (password !== passwordConfirmation) {
+      throw new ValidationError("Passwords do not match");
+    }
+
+    const user = await strapi
+      .query("plugin::users-permissions.user")
+      .findOne({ where: { resetPasswordToken: code } });
+
+    if (!user) {
+      throw new ValidationError("Incorrect code provided");
+    }
+    await getService("user").edit(user.id, {
+      resetPasswordToken: null,
+      password,
+    });
+    const emailTemplate = {
+      subject: `Password Reset Completed`,
+      username: `${user.fullName.split(" ")[0] || user.username}`,
+      url: process.env.FRONT_END_HOST,
+      firstLine:
+        "Your password reset was completed successfully, you may now log in with your email and new password.",
+      secondLine: `If this wasn't you please contact support.`,
+      thirdLine: "",
+      buttonText: "Click here to login",
+    };
+
+    const message = {
+      sender: "talentkids admin",
+      recipientEmail: user.email,
+      recipientName: user.fullName,
+      messageType: "password reset",
+      messageImage: adminLogo,
+      subject: "Password Reset Completed",
+      message:
+        "Your password reset was completed successfully, you may now log in with your email and new password.",
+      entityId: user.id,
+      entityType: "Auth",
+      url: "",
+    };
+    await createNotification(message, user.email, "d-2d1c3546ff9e4eea9eab196625725a2a", emailTemplate);
+    // Update the user.
+    ctx.send({
+      jwt: getService("jwt").issue({ id: user.id }),
+      user: await sanitizeUser(user, ctx),
+    });
+  };
+
+  plugin.controllers.auth.emailConfirmation = async (ctx) => {
+    const { confirmation: confirmationToken } =
+      await validateEmailConfirmationBody(ctx.query);
+
+    const userService = getService("user");
+    const jwtService = getService("jwt");
+
+    const [user] = await userService.fetchAll({
+      filters: { confirmationToken },
+    });
+
+    if (!user) {
+      throw new ValidationError("Invalid token");
+    }
+
+    await userService.edit(user.id, {
+      confirmed: true,
+      confirmationToken: null,
+    });
+
+    const emailTemplate = {
+      subject: "Welcome to talentKids!",
+      username: `${user.fullName.split(" ")[0] || user.username}`,
+      url: process.env.FRONT_END_HOST,
+      firstLine: "Welcome to Talentkids! We're thrilled to have you on board",
+      secondLine: `We encourage you to explore our platform and discover all that talentkids has to offer.`,
+      thirdLine: "",
+      buttonText: "Click here to login",
+    };
+
+    const message = {
+      sender: "talentkids admin",
+      recipientEmail: user.email,
+      recipientName: user.fullName,
+      messageType: "Welcome to TalentKids!",
+      messageImage: adminLogo,
+      subject: "Welcome to talentKids!",
+      message:
+        "Welcome to Talentkids! We're thrilled to have you on board! We encourage you to explore our platform and discover all that talentkids has to offer.",
+      entityId: user.id,
+      entityType: "Auth",
+      url: "",
+    };
+    await createNotification(
+      message,
+      user.email,
+      "d-2d1c3546ff9e4eea9eab196625725a2a",
+      emailTemplate
+    );
+
+    if (returnUser) {
+      ctx.send({
+        jwt: jwtService.issue({ id: user.id }),
+        user: await sanitizeUser(user, ctx),
+      });
+    } else {
+      const settings = await strapi
+        .store({ type: "plugin", name: "users-permissions", key: "advanced" })
+        .get();
+
+      ctx.redirect(settings.email_confirmation_redirection || "/");
     }
   };
 

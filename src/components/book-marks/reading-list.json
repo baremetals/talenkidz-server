@@ -22,23 +22,39 @@
     "type": {
       "type": "string"
     },
-    "article": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::article.article"
-    },
-    "event": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::event.event"
-    },
-    "listing": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::listing.listing"
-    },
     "category": {
       "type": "string"
+    },
+    "userImage": {
+      "type": "string"
+    },
+    "userName": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "time": {
+      "type": "string"
+    },
+    "readingTimeOrPrice": {
+      "type": "string"
+    },
+    "venue": {
+      "type": "string",
+      "default": "online"
+    },
+    "blurb": {
+      "type": "text",
+      "default": "blurb"
+    },
+    "location": {
+      "type": "string",
+      "default": "London"
+    },
+    "venueName": {
+      "type": "string",
+      "default": "venueName"
     }
   }
 }

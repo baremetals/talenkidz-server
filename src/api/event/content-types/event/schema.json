@@ -100,9 +100,6 @@
       "type": "string",
       "default": "0"
     },
-    "startTime": {
-      "type": "time"
-    },
     "views": {
       "type": "biginteger"
     },
@@ -111,6 +108,9 @@
       "relation": "oneToOne",
       "target": "api::order.order",
       "mappedBy": "event"
+    },
+    "startTime": {
+      "type": "string"
     }
   }
 }

@@ -22,8 +22,45 @@ const sendEmailConfirmationBodySchema = yup.object().shape({
     .required(),
 });
 
+const validateEmailConfirmationSchema = yup.object({
+  confirmation: yup.string().required(),
+});
+
+const changePasswordSchema = yup
+  .object({
+    password: yup.string().required(),
+    passwordConfirmation: yup
+      .string()
+      .required()
+      .oneOf([yup.ref("password")], "Passwords do not match"),
+    currentPassword: yup.string().required(),
+  })
+  .noUnknown();
+
+  const resetPasswordSchema = yup
+    .object({
+      password: yup.string().required(),
+      passwordConfirmation: yup.string().required(),
+      code: yup.string().required(),
+    })
+    .noUnknown();
+
+    const forgotPasswordSchema = yup
+      .object({
+        email: yup.string().email().required(),
+      })
+      .noUnknown();
+
 module.exports = {
   validateCallbackBody: validateYupSchema(callbackBodySchema),
   validateRegisterBody: validateYupSchema(registerBodySchema),
-  validateSendEmailConfirmationBody: validateYupSchema(sendEmailConfirmationBodySchema),
+  validateSendEmailConfirmationBody: validateYupSchema(
+    sendEmailConfirmationBodySchema
+  ),
+  validateEmailConfirmationBody: validateYupSchema(
+    validateEmailConfirmationSchema
+  ),
+  validateChangePasswordBody: validateYupSchema(changePasswordSchema),
+  validateResetPasswordBody: validateYupSchema(resetPasswordSchema),
+  validateForgotPasswordBody: validateYupSchema(forgotPasswordSchema),
 };

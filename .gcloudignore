@@ -11,3 +11,4 @@ build
 .strapi-updater.json
 app.yaml
 app-dev.yml
+dist
